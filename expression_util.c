@@ -306,24 +306,24 @@ int
 instantiable( Expression *expression, _context *context )
 {
 	if ( expression->result.marked ) {
-		log_error( context, 0, "'?' is not instantiable" );
+		raise_error( context, 0, "'?' is not instantiable" );
 		return 0;
 	}
 
 	ExpressionSub *sub = expression->sub;
 	if ( expression->result.as_sub || !sub[ 3 ].result.any ) {
-		log_error( context, 0, "instance designation is not allowed in instantiation mode" );
+		raise_error( context, 0, "instance designation is not allowed in instantiation mode" );
 		return 0;
 	}
 
 	if ( sub[ 0 ].result.any || sub[ 1 ].result.any || sub[ 2 ].result.any ) {
-		log_error( context, 0, "'.' is not instantiable" );
+		raise_error( context, 0, "'.' is not instantiable" );
 		return 0;
 	}
 
 	for ( int i=0; i<4; i++ ) {
 		if ( sub[ i ].result.active || sub[ i ].result.inactive || sub[ i ].result.not ) {
-			log_error( context, 0, "expression flags are not allowed in instantiation mode" );
+			raise_error( context, 0, "expression flags are not allowed in instantiation mode" );
 			return 0;
 		}
 	}
@@ -349,7 +349,7 @@ instantiable( Expression *expression, _context *context )
 			}
 			if ( entry == NULL ) {
 				char *msg; asprintf( &msg, "variable '%%%s' not found", identifier );
-				log_error( context, 0, msg ); free( msg );
+				raise_error( context, 0, msg ); free( msg );
 				return 0;
 			}
 			VariableVA *variable = (VariableVA *) entry->value;
@@ -359,7 +359,7 @@ instantiable( Expression *expression, _context *context )
 				break;
 			case NarrativeVariable:
 				; char *msg; asprintf( &msg, "'%%%s' is a narrative variable - not allowed in expressions", identifier );
-				log_error( context, 0, msg ); free( msg );
+				raise_error( context, 0, msg ); free( msg );
 				return 0;
 			case ExpressionVariable:
 				if ( !instantiable( ((listItem * ) variable->data.value )->ptr, context ) )

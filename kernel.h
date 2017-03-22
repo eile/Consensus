@@ -361,6 +361,7 @@ typedef struct {
 	struct {
 		unsigned int flush_input;
 		unsigned int flush_output;
+        int code;
 	} error;
 }
 _context;
@@ -430,7 +431,7 @@ _action	warning;
 	kernel utilities	- public
 ---------------------------------------------------------------------------*/
 
-int log_error( _context *context, int event, char *message );
+int raise_error( _context *context, int event, char *message );
 void set_control_mode( ControlMode mode, int event, _context *context );
 int context_check( int freeze, int instruct, int execute );
 

@@ -177,14 +177,14 @@ set_sub_mark( int count, int event, _context *context )
 	if (( count == 3 ) && ( event == ':' )) {
 		StackVA *stack = (StackVA*) context->control.stack->ptr;
 		if ( stack->expression.flags.not )
-			return log_error( context, event, "extraneous '~' in expression" );
+			return raise_error( context, event, "extraneous '~' in expression" );
 		if ( stack->expression.flags.active )
-			return log_error( context, event, "extraneous '*' in expression" );
+			return raise_error( context, event, "extraneous '*' in expression" );
 		if ( stack->expression.flags.inactive )
-			return log_error( context, event, "extraneous '_' in expression" );
+			return raise_error( context, event, "extraneous '_' in expression" );
 	}
 	if ( context->expression.marked ) {
-		return log_error( context, event, "too many '?''s" );
+		return raise_error( context, event, "too many '?''s" );
 	}
 	context->expression.marked = 1;
 	if ( context->control.mode != ExecutionMode )
@@ -229,7 +229,7 @@ set_sub_any( int count, int event, _context *context )
 		stack->expression.flags.not = 0;
 		stack->expression.flags.active = 0;
 		if ( stack->expression.flags.inactive ) {
-			return log_error( context, event, "(nil) is always active" );
+			return raise_error( context, event, "(nil) is always active" );
 		}
 	} else {
 		expression->sub[ count ].result.any = 1;
@@ -332,7 +332,6 @@ static int
 set_source_mark( char *state, int event, char **next_state, _context *context )
 {
 	return set_sub_mark( 0, event, context );
-	
 }
 static int
 set_source_null( char *state, int event, char **next_state, _context *context )
@@ -518,7 +517,7 @@ set_flag_not( char *state, int event, char **next_state, _context *context )
 {
 	StackVA *stack = (StackVA*) context->control.stack->ptr;
 	if ( stack->expression.flags.not ) {
-		return log_error( context, event, "redundant '~' in expression" );
+		return raise_error( context, event, "redundant '~' in expression" );
 	}
 	stack->expression.flags.not = 1;
 	return 0;
@@ -528,10 +527,10 @@ set_flag_active( char *state, int event, char **next_state, _context *context )
 {
 	StackVA *stack = (StackVA*) context->control.stack->ptr;
 	if ( stack->expression.flags.not ) {
-		return log_error( context, event, "'*' must precede '~' in expression" );
+		return raise_error( context, event, "'*' must precede '~' in expression" );
 	}
 	if ( stack->expression.flags.inactive ) {
-		return log_error( context, event, "conflicting '_' and '*' in expression" );
+		return raise_error( context, event, "conflicting '_' and '*' in expression" );
 	}
 	stack->expression.flags.active = 1;
 	return 0;
@@ -541,10 +540,10 @@ set_flag_inactive( char *state, int event, char **next_state, _context *context 
 {
 	StackVA *stack = (StackVA*) context->control.stack->ptr;
 	if ( stack->expression.flags.not ) {
-		return log_error( context, event, "'_' must precede '~' in expression" );
+		return raise_error( context, event, "'_' must precede '~' in expression" );
 	}
 	if ( stack->expression.flags.active ) {
-		return log_error( context, event, "conflicting '*' and '_' in expression" );
+		return raise_error( context, event, "conflicting '*' and '_' in expression" );
 	}
 	stack->expression.flags.inactive = 1;
 	return 0;
@@ -713,7 +712,7 @@ static int
 set_mark( char *state, int event, char **next_state, _context *context )
 {
 	if ( context->expression.marked ) {
-		return log_error( context, event, "'?' too many question marks" );
+		return raise_error( context, event, "'?' too many question marks" );
 	}
 	context->expression.marked = 1;
 	if ( context->control.mode != ExecutionMode )
@@ -1658,4 +1657,3 @@ parse_expression( char *state, int event, char **next_state, _context *context )
 
 	return event;
 }
-

@@ -94,7 +94,7 @@ assign_results( char *state, int event, char **next_state, _context *context )
 	fprintf( stderr, "debug> : %s : expression-results\n", context->identifier.id[ 0 ].ptr );
 #endif
 	if ( context->identifier.id[ 0 ].type != DefaultIdentifier ) {
-		return log_error( context, event, "variable names cannot be in \"quotes\"" );
+		return raise_error( context, event, "variable names cannot be in \"quotes\"" );
 	}
 
 	StackVA *stack = (StackVA *) context->control.stack->ptr;
@@ -104,7 +104,7 @@ assign_results( char *state, int event, char **next_state, _context *context )
 	// -------------------------------------
 
 	if ( context->expression.results == NULL ) {
-		return log_error( context, event, "cannot set variable to (null) results");
+		return raise_error( context, event, "cannot set variable to (null) results");
 	}
 
 	// fetch or create identified variable in current scope
@@ -144,13 +144,13 @@ assign_va( char *state, int event, char **next_state, _context *context )
 	fprintf( stderr, "debug> : %s : %%[_].$( %s )\n", context->identifier.id[ 0 ].ptr, context->identifier.id[ 2 ].ptr );
 #endif
 	if ( context->identifier.id[ 0 ].type != DefaultIdentifier ) {
-		return log_error( context, event, "variable names cannot be in \"quotes\"" );
+		return raise_error( context, event, "variable names cannot be in \"quotes\"" );
 	}
 	if ( context->expression.results == NULL ) {
-		return log_error( context, event, "va assignment missing target entity" );
+		return raise_error( context, event, "va assignment missing target entity" );
 	}
 	if ( strcmp( context->identifier.id[ 2 ].ptr, "literal" ) ) {
-		return log_error( context, event, "currently only 'filter' values can be assigned to variables" );
+		return raise_error( context, event, "currently only 'filter' values can be assigned to variables" );
 	}
 
 	// fetch or create identified variable in current scope
@@ -200,14 +200,14 @@ assign_narrative( char *state, int event, char **next_state, _context *context )
 	fprintf( stderr, "debug> : %s : %s()\n", context->identifier.id[ 0 ].ptr, context->identifier.id[ 1 ].ptr );
 #endif
 	if ( context->identifier.id[ 0 ].type != DefaultIdentifier ) {
-		return log_error( context, event, "variable names cannot be in \"quotes\"" );
+		return raise_error( context, event, "variable names cannot be in \"quotes\"" );
 	}
 
 	if ( context->identifier.id[ 1 ].ptr == NULL ) {
-		return log_error( context, event, "cannot set narrative variable to (null) results" );
+		return raise_error( context, event, "cannot set narrative variable to (null) results" );
 	}
 	if ( context->expression.results == NULL ) {
-		return log_error( context, event, "narrative definition missing target entity" );
+		return raise_error( context, event, "narrative definition missing target entity" );
 	}
 
 	// fetch or create identified variable in current scope
@@ -315,10 +315,10 @@ assign_expression( char *state, int event, char **next_state, _context *context 
 
 	Expression *expression = context->expression.ptr;
 	if ( expression == NULL ) {
-		return log_error( context, event, "cannot assign variable to (null) expression" );
+		return raise_error( context, event, "cannot assign variable to (null) expression" );
 	}
 	if ( context->identifier.id[ 0 ].type != DefaultIdentifier ) {
-		return log_error( context, event, "variable names cannot be in \"quotes\"" );
+		return raise_error( context, event, "variable names cannot be in \"quotes\"" );
 	}
 
 #ifdef DEBUG
@@ -334,14 +334,14 @@ assign_expression( char *state, int event, char **next_state, _context *context 
 	if ( context->expression.filter_identifier != NULL ) {
 		context->expression.mode = ReadMode;
 		int retval = expression_solve( expression, 3, context );
-		if ( retval <= 0 ) return log_error( context, event, "cannot assign variable to (null) results" );
+		if ( retval <= 0 ) return raise_error( context, event, "cannot assign variable to (null) results" );
 		type = (( context->expression.mode == ReadMode ) ? LiteralVariable : EntityVariable );
 	} else {
 		count = count_occurrences( expression, identifier, 0 );
 		if ( count > 0 ) {
 			registryEntry *entry = lookupVariable( context, identifier );
 			if (( entry == NULL ) || (((VariableVA *) entry->value )-> type != ExpressionVariable ))
-				return log_error( context, event, "self-referencing variable has no match\n" );
+				return raise_error( context, event, "self-referencing variable has no match\n" );
 		}
 		type = ExpressionVariable;
 		freeListItem( &context->expression.results );

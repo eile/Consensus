@@ -507,7 +507,7 @@ output_va( char *state, int event, char **next_state, _context *context )
 	}
 	if ( lookupByName( CN.VB, va_name ) == NULL ) {
 		char *msg; asprintf( &msg, "unknown value account name '%s'", va_name );
-		event = log_error( context, event, msg ); free( msg );
+		event = raise_error( context, event, msg ); free( msg );
 		return event;
 	}
 	output_va_( va_name, event, context );

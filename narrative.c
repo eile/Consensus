@@ -159,7 +159,7 @@ narrative_on_in_on_( int event, _context *context )
 		if ( parent->type == ThenOccurrence )
 			break;
 		if ( parent->type == EventOccurrence ) {
-			return log_error( context, event, "narrative on-in-on sequence is not supported" );
+			return raise_error( context, event, "narrative on-in-on sequence is not supported" );
 		}
 	}
 	return event;
@@ -181,7 +181,7 @@ narrative_on_init_on_( int event, _context *context )
 		if ( parent->type == ThenOccurrence )
 			break;
 		if (( parent->type == EventOccurrence ) && parent->va.event.type.init ) {
-			return log_error( context, event, "narrative on-init-on sequence is not supported" );
+			return raise_error( context, event, "narrative on-init-on sequence is not supported" );
 		}
 	}
 	return event;
@@ -201,7 +201,7 @@ narrative_then_on_init_( int event, _context *context )
 	}
 	for ( ; parent != NULL; parent=parent->thread ) {
 		if ( parent->type == ThenOccurrence ) {
-			return log_error( context, event, "narrative then-on-init sequence is not supported" );
+			return raise_error( context, event, "narrative then-on-init sequence is not supported" );
 		}
 	}
 	return event;
@@ -313,7 +313,7 @@ static int
 set_event_identifier( char *state, int event, char **next_state, _context *context )
 {
 	if ( !strcmp( context->identifier.id[ 0 ].ptr, "init" ) ) {
-		return log_error( context, event, "'init' used as event identifier" );
+		return raise_error( context, event, "'init' used as event identifier" );
 	}
 	StackVA *stack = (StackVA *) context->control.stack->ptr;
 	stack->narrative.event.identifier.name = context->identifier.id[ 0 ].ptr;
@@ -325,7 +325,7 @@ static int
 set_event_variable( char *state, int event, char **next_state, _context *context )
 {
 	if ( !strcmp( context->identifier.id[ 0 ].ptr, "init" ) ) {
-		return log_error( context, event, "'init' used as event identifier" );
+		return raise_error( context, event, "'init' used as event identifier" );
 	}
 	StackVA *stack = (StackVA *) context->control.stack->ptr;
 	stack->narrative.event.identifier.type = VariableIdentifier;
@@ -375,7 +375,7 @@ check_init_event( char *state, int event, char **next_state, _context *context )
 	}
 	else {
 		char *msg; asprintf( &msg, "unspecified event for identifier '%s'", context->identifier.id[ 0 ].ptr );
-		event = log_error( context, event, msg ); free( msg );
+		event = raise_error( context, event, msg ); free( msg );
 	}
 	return event;
 }
@@ -520,7 +520,7 @@ read_narrative_then( char *state, int event, char **next_state, _context *contex
 {
 	StackVA *stack = (StackVA *) context->control.stack->ptr;
 	if ( !stack->narrative.state.action && !stack->narrative.state.whole ) {
-		return log_error( context, event, "'then' must follow action..." );
+		return raise_error( context, event, "'then' must follow action..." );
 	}
 	if ( stack->narrative.state.exit ) {
 		fprintf( stderr, "consensus> Warning: 'then' following exit - may be ignored\n" );
@@ -895,7 +895,7 @@ read_narrative( char *state, int event, char **next_state, _context *context )
 	case FreezeMode:
 		return 0;
 	case InstructionMode:
-		return log_error( context, event, "narrative definition is only supported in Execution Mode" );
+		return raise_error( context, event, "narrative definition is only supported in Execution Mode" );
 	case ExecutionMode:
 		break;
 	}

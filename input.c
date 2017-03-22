@@ -72,7 +72,7 @@ flush_input( char *state, int event, char **next_state, _context *context )
 
 		// here we are in the execution part of a loop => abort
 		StackVA *stack = (StackVA *) context->control.stack->ptr;
-		log_error( context, 0, "aborting loop..." );
+		raise_error( context, 0, "aborting loop..." );
 		freeListItem( &stack->loop.index );
 		freeInstructionBlock( context );
 		stack->loop.begin = NULL;
@@ -113,7 +113,7 @@ push_input( char *identifier, void *src, InputType type, _context *context )
 		; registryEntry *stream = lookupByName( context->input.stream, identifier );
 		if ( stream != NULL ) {
 			char *msg; asprintf( &msg, "recursion in stream: \"%s\"", identifier );
-			int event = log_error( context, event, msg ); free( msg );
+			int event = raise_error( context, event, msg ); free( msg );
 			free( identifier );
 			return event;
 		}
@@ -130,7 +130,7 @@ push_input( char *identifier, void *src, InputType type, _context *context )
 		if ( input->ptr.file == NULL ) {
 			free( input );
 			char *msg; asprintf( &msg, "could not open stream: \"%s\"", identifier );
-			int event = log_error( context, event, msg ); free( msg );
+			int event = raise_error( context, event, msg ); free( msg );
 			return event;
 		}
 		context->hcn.state = base;
@@ -142,7 +142,7 @@ push_input( char *identifier, void *src, InputType type, _context *context )
 			registryEntry *entry = lookupByName( context->input.string, identifier );
 			if ( entry != NULL ) {
 				char *msg; asprintf( &msg, "recursion in input variable: %%%s", identifier );
-				int event = log_error( context, 0, msg ); free( msg );
+				int event = raise_error( context, 0, msg ); free( msg );
 				return event;
 			}
 		}
@@ -207,7 +207,7 @@ pop_input( char *state, int event, char **next_state, _context *context )
 	StreamVA *input = (StreamVA *) context->input.stack->ptr;
 	int delta = context->control.level - input->level;
 	if ( delta > 0 ) {
-		event = log_error( context, 0, "reached premature EOF - restoring original stack level" );
+		event = raise_error( context, 0, "reached premature EOF - restoring original stack level" );
 		while ( delta-- ) pop( state, event, next_state, context );
 	}
 	else event = 0;
@@ -272,6 +272,8 @@ input( char *state, int event, char **next_state, _context *context )
 		{
 			if ( !strcmp( state, base ) ) prompt( context );
 			event = getchar( );
+            if( event == EOF )
+                exit( EXIT_SUCCESS );
 			if ( event == '\n' ) context->control.prompt = 1;
 		}
 		else
@@ -370,6 +372,7 @@ input( char *state, int event, char **next_state, _context *context )
 		}
 	}
 	while ( event == 0 );
+    context->error.code = EXIT_SUCCESS;
 
 	// record instruction or expression if needed
 
@@ -491,4 +494,3 @@ read_va_identifier( char *state, int event, char **next_state, _context *context
 	context->identifier.current = 0;
 	return event;
 }
-

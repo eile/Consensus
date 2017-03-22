@@ -59,12 +59,13 @@ set_control_mode( ControlMode mode, int event, _context *context )
 }
 
 /*---------------------------------------------------------------------------
-	log_error	= utility
+	raise_error	= utility
 ---------------------------------------------------------------------------*/
 int
-log_error( _context *context, int event, char *message )
+raise_error( _context *context, int event, char *message )
 {
 	context->error.flush_input = !(( event == '\n' ) || ( event == 0 ));
+    context->error.code = EXIT_FAILURE;
 	if ( message != NULL ) {
 		// must flush output on stdout
 		if ( context->error.flush_output ) {
@@ -115,7 +116,7 @@ error( char *state, int event, char **next_state, _context *context )
 	} else if ( event != 0 ) {
 		asprintf( &message, "in \"%s\", on '%c', syntax error", state, event );
 	}
-	event = log_error( context, event, message );
+	event = raise_error( context, event, message );
 	free( message );
 	return event;
 }
@@ -183,7 +184,7 @@ pop( char *state, int event, char **next_state, _context *context )
 		StreamVA *input = (StreamVA *) context->input.stack->ptr;
 		if ( context->control.level == input->level ) {
 			input->mode.pop = 1;
-			return log_error( context, event, "attempt to pop control beyond authorized level - closing stream..." );
+			return raise_error( context, event, "attempt to pop control beyond authorized level - closing stream..." );
 		}
 	}
 
@@ -209,4 +210,3 @@ pop( char *state, int event, char **next_state, _context *context )
 #endif
 	return 0;
 }
-

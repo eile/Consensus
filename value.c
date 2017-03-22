@@ -32,7 +32,7 @@ set_va_( char *va_name, int event, _context *context )
 		Narrative *narrative = lookupNarrative( CN.nil, name );
 		if ( narrative == NULL ) {
 			char *msg; asprintf( &msg, "narrative '%s' is not instantiated", name );
-			event = log_error( context, event, msg ); free( msg );
+			event = raise_error( context, event, msg ); free( msg );
 			return event;
 		}
 
@@ -46,13 +46,13 @@ set_va_( char *va_name, int event, _context *context )
 		}
 	}
 	else if ( context->identifier.id[ 1 ].type != StringIdentifier ) {
-		return log_error( context, event, "expected argument in \"quotes\"" );
+		return raise_error( context, event, "expected argument in \"quotes\"" );
 	}
 	else {
 		void *value = string_extract( context->identifier.id[ 1 ].ptr );
 		if ( value == NULL ) {
 			char *msg; asprintf( &msg, "account '%s' cannot be set to (null) value", va_name );
-			event = log_error( context, event, msg ); free( msg );
+			event = raise_error( context, event, msg ); free( msg );
 			return event;
 		}
 		for ( listItem *i = (listItem *) context->expression.results; i!=NULL; i=i->next ) {
@@ -73,12 +73,12 @@ set_va( char *state, int event, char **next_state, _context *context )
 		return 0;
 
 	if ( context->expression.results == NULL )
-		return log_error( context, event, "cannot assign value to (null) results" );
+		return raise_error( context, event, "cannot assign value to (null) results" );
 
 	char *va_name = context->identifier.id[ 2 ].ptr;
 	if ( lookupByName( CN.VB, va_name ) == NULL ) {
 		char *msg; asprintf( &msg, "unknown value account name '%s'", va_name );
-		event = log_error( context, event, msg ); free( msg );
+		event = raise_error( context, event, msg ); free( msg );
 		return event;
 	}
 	return set_va_( va_name, event, context );
@@ -97,17 +97,17 @@ set_va_from_variable( char *state, int event, char **next_state, _context *conte
 		return 0;
 
 	if ( context->expression.results == NULL )
-		return log_error( context, event, "cannot assign value to (null) results" );
+		return raise_error( context, event, "cannot assign value to (null) results" );
 
 	// check value account name
 	char *va_name = context->identifier.id[ 2 ].ptr;
 	if ( lookupByName( CN.VB, va_name ) == NULL ) {
 		char *msg; asprintf( &msg, "unknown value account name '%s'", va_name );
-		event = log_error( context, event, msg ); free( msg );
+		event = raise_error( context, event, msg ); free( msg );
 		return event;
 	}
 	if ( strcmp( va_name, "narratives" ) ) {
-		return log_error( context, event, "only narrative accounts can be set from variable" );
+		return raise_error( context, event, "only narrative accounts can be set from variable" );
 	}
 
 	// check variable name & type
@@ -115,14 +115,14 @@ set_va_from_variable( char *state, int event, char **next_state, _context *conte
 	registryEntry *entry = lookupVariable( context, name );
 	if ( entry == NULL ) {
 		char *msg; asprintf( &msg, "variable '%s' is not set", name );
-		event = log_error( context, event, msg ); free( msg );
+		event = raise_error( context, event, msg ); free( msg );
 		return event;
 	}
 
 	VariableVA *variable = (VariableVA *) entry->value;
 	if ( variable->type != NarrativeVariable ) {
 		char *msg; asprintf( &msg, "variable '%s' is not a narrative variable", name );
-		event = log_error( context, event, msg ); free( msg );
+		event = raise_error( context, event, msg ); free( msg );
 		return event;
 	}
 

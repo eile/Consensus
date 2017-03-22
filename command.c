@@ -94,7 +94,7 @@ set_expression_filter( char *state, int event, char **next_state, _context *cont
 		return event;
 
 	if ( context->identifier.id[ 1 ].type != DefaultIdentifier ) {
-		return log_error( context, event, "variable names cannot be in \"quotes\"" );
+		return raise_error( context, event, "variable names cannot be in \"quotes\"" );
 	}
 
 	context->expression.filter_identifier = context->identifier.id[ 1 ].ptr;
@@ -148,7 +148,7 @@ command_expression( char *state, int event, char **next_state, _context *context
 		return 0;
 
 	int retval = expression_solve( context->expression.ptr, 3, context );
-	if ( retval == -1 ) return log_error( context, event, NULL );
+	if ( retval == -1 ) return raise_error( context, event, NULL );
 
 	switch ( context->expression.mode ) {
 	case InstantiateMode:
@@ -384,10 +384,10 @@ exit_narrative( char *state, int event, char **next_state, _context *context )
 			break;
 	case ExecutionMode:
 		if ( context->narrative.current == NULL ) {
-			return log_error( context, event, "'exit' command only supported in narrative mode" );
+			return raise_error( context, event, "'exit' command only supported in narrative mode" );
 		}
 		else if ( context->narrative.mode.action.block && ( context->control.mode == InstructionMode ) ) {
-			return log_error( context, event, "'exit' is not a supported instruction - use 'do exit' action instead" );
+			return raise_error( context, event, "'exit' is not a supported instruction - use 'do exit' action instead" );
 		}
 		context->narrative.current->deactivate = 1;
 	}
@@ -500,7 +500,7 @@ flip_condition( char *state, int event, char **next_state, _context *context )
 			case ConditionPassive:
 				break;
 			case ConditionNone:
-				return log_error( context, event, "not in conditional execution mode" );
+				return raise_error( context, event, "not in conditional execution mode" );
 		}
 		break;
 	case ExecutionMode:
@@ -512,7 +512,7 @@ flip_condition( char *state, int event, char **next_state, _context *context )
 				stack->condition = ConditionActive;
 				break;
 			case ConditionNone:
-				return log_error( context, event, "not in conditional execution mode" );
+				return raise_error( context, event, "not in conditional execution mode" );
 		}
 		if ( stack->condition == ConditionPassive )
 			set_control_mode( FreezeMode, event, context );
@@ -583,7 +583,7 @@ command_push_input( InputType type, int event, _context *context )
 		break;
 	case ExecutionMode:
 		if ( context->identifier.id[ 0 ].type != StringIdentifier ) {
-			return log_error( context, event, "expected argument in \"quotes\"" );
+			return raise_error( context, event, "expected argument in \"quotes\"" );
 		}
 		char *identifier;
 		if ( type == PipeInput ) {
@@ -628,7 +628,7 @@ command_pop( char *state, int event, char **next_state, _context *context )
 		}
 		if ( context->control.level != context->record.level ) {
 			if ( !strcmp( state, "/." ) ) {
-				return log_error( context, event, "'/.' only allowed to close instruction block..." );
+				return raise_error( context, event, "'/.' only allowed to close instruction block..." );
 			}
 			break;
 		}

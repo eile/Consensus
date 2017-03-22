@@ -321,7 +321,7 @@ solve( Expression *expression, int as_sub, listItem *results )
 				}
 				if ( entry == NULL ) {
 					char *msg; asprintf( &msg, "variable '%%%s' not found", identifier );
-					int retval = log_error( context, 0, msg ); free( msg );
+					int retval = raise_error( context, 0, msg ); free( msg );
 					return retval;
 				}
 				VariableVA *variable = (VariableVA *) entry->value;
@@ -375,7 +375,7 @@ solve( Expression *expression, int as_sub, listItem *results )
 					break;
 				case NarrativeVariable:
 					; char *msg; asprintf( &msg, "'%%%s' is a narrative variable - not allowed in expressions", identifier );
-					int retval = log_error( context, 0, msg ); free( msg );
+					int retval = raise_error( context, 0, msg ); free( msg );
 					return retval;
 				}
 			}
@@ -400,7 +400,7 @@ solve( Expression *expression, int as_sub, listItem *results )
 				break;
 			}
 			else {
-				return log_error( context, 0, "expression terms are incomplete" );
+				return raise_error( context, 0, "expression terms are incomplete" );
 			}
 			break;
 		case DefaultIdentifier:
@@ -432,7 +432,7 @@ solve( Expression *expression, int as_sub, listItem *results )
 						return 0;
 					} else {
 						char *msg; asprintf( &msg, "'%s' is not instantiated", identifier );
-						int retval = log_error( context, 0, msg ); free( msg );
+						int retval = raise_error( context, 0, msg ); free( msg );
 						return retval;
 					}
 				}
@@ -461,7 +461,7 @@ solve( Expression *expression, int as_sub, listItem *results )
 				e->result.list = NULL;
 			}
 			else {
-				return log_error( context, 0, "expression terms are incomplete" );
+				return raise_error( context, 0, "expression terms are incomplete" );
 			}
 			break;
 		}
@@ -864,7 +864,7 @@ expression_solve( Expression *expression, int as_sub, _context *context )
 	// in case of embedded expressions: check against infinite loop
 	for ( listItem *i = context->expression.stack; i!=NULL; i=i->next ) {
 		if ( expression == i->ptr ) {
-			return log_error( context, 0, "recursion in expression" );
+			return raise_error( context, 0, "recursion in expression" );
 		}
 	}
 	addItem( &context->expression.stack, expression );

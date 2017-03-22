@@ -27,12 +27,12 @@ set_filter_variable( _context *context )
 		return 0;
 
 	if ( context->expression.filter != NULL )
-		return log_error( context, 0, "expression filter is already in place" );
+		return raise_error( context, 0, "expression filter is already in place" );
 
 	registryEntry *entry = lookupVariable( context, identifier );
 	if ( entry == NULL ) {
 		char *msg; asprintf( &msg, "variable '%%%s' not found", identifier );
-		retval = log_error( context, 0, msg ); free( msg );
+		retval = raise_error( context, 0, msg ); free( msg );
 		return retval;
 	}
 
@@ -43,7 +43,7 @@ set_filter_variable( _context *context )
 		if ( context->expression.mode == InstantiateMode ) {
 			asprintf( &msg, "'%%%s' is an entity variable - "
 				"cannot be used as expression filter in instantiation mode", identifier );
-			retval = log_error( context, 0, msg ); free( msg );
+			retval = raise_error( context, 0, msg ); free( msg );
 			return retval;
 		}
 		context->expression.mode = EvaluateMode;
@@ -52,7 +52,7 @@ set_filter_variable( _context *context )
 	case ExpressionVariable:
 		asprintf( &msg, "'%%%s' is an expression variable - "
 			"cannot be used as expression filter", identifier );
-		retval = log_error( context, 0, msg ); free( msg );
+		retval = raise_error( context, 0, msg ); free( msg );
 		return retval;
 	case LiteralVariable:
 		context->expression.mode = ReadMode;
@@ -60,7 +60,7 @@ set_filter_variable( _context *context )
 	case NarrativeVariable:
 		asprintf( &msg, "'%%%s' is a narrative variable - "
 			"cannot be used as expression filter", identifier );
-		retval = log_error( context, 0, msg ); free( msg );
+		retval = raise_error( context, 0, msg ); free( msg );
 		return retval;
 	}
 
